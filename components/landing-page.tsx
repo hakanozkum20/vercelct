@@ -150,7 +150,8 @@ export function LandingPage() {
       setIsPaymentOpen(true)
     } else {
       // Ücretsiz plan için direkt auth'a yönlendir
-      window.location.href = "/auth"
+      // window.location.href = "/auth"
+      console.log("Ücretsiz plan seçildi - yönlendirme geçici olarak devre dışı")
     }
   }
 
@@ -184,7 +185,10 @@ export function LandingPage() {
               <Clock className="w-4 h-4 mr-2" />
               Yakında
             </Button>
-            <Button size="sm" onClick={() => (window.location.href = "/auth")}>
+            <Button 
+              size="sm" 
+              onClick={() => console.log("Giriş yap butonuna tıklandı - yönlendirme geçici olarak devre dışı")}
+            >
               Giriş Yap
             </Button>
           </div>
@@ -629,7 +633,8 @@ export function LandingPage() {
                   // Ödeme işlemi simülasyonu
                   setTimeout(() => {
                     setIsPaymentOpen(false)
-                    window.location.href = "/auth"
+                    // window.location.href = "/auth"
+                    console.log("Ödeme tamamlandı - auth yönlendirmesi geçici olarak devre dışı")
                   }, 1000)
                 }}
               >
