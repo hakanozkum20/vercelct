@@ -255,7 +255,7 @@ export function LandingPage() {
                 <div className="text-sm text-muted-foreground">Beta Kayıt</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">Q1 2024</div>
+                <div className="text-2xl font-bold text-foreground">Q1 2025</div>
                 <div className="text-sm text-muted-foreground">Lansман</div>
               </div>
               <div className="text-center">
@@ -584,7 +584,7 @@ export function LandingPage() {
           </div>
 
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 CoachTale. Tüm hakları saklıdır.</p>
+            <p>&copy; 2025 CoachTale. Tüm hakları saklıdır.</p>
           </div>
         </div>
       </footer>
