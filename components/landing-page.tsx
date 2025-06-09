@@ -223,7 +223,7 @@ export function LandingPage() {
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
               CoachTale ile yapay zeka destekli kişiselleştirilmiş çalışma planları oluşturun. TYT ve AYT'de
-              hedeflediğiniz puanlara ulaşın, başarı hikayanizi yazın.
+              hedeflediğiniz puanlara ulaşın, başarı hikayenizi yazın.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -244,7 +244,7 @@ export function LandingPage() {
                 <Button className="sm:px-6">Erken Erişim</Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2 text-center">
-                Lansmanı kaçırmayın! İlk 1000 kullanıcıya özel indirim.
+                Lansman'ı kaçırmayın! İlk 1000 kullanıcıya özel indirim.
               </p>
             </div>
 
@@ -277,7 +277,7 @@ export function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Neden CoachTale?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Yapay zeka teknolojisi ile desteklenen özellikleriyle başarı hikayanizi yazın
+              Yapay zeka teknolojisi ile desteklenen özellikleriyle başarı hikayenizi yazın
             </p>
           </div>
 
