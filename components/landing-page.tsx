@@ -470,7 +470,7 @@ export function LandingPage() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Başarı Hikayaniz İçin Hazır Olun</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Başarı Hikayeniz İçin Hazır Olun</h2>
             <p className="text-xl text-muted-foreground mb-8">
               CoachTale ile yapay zeka destekli çalışma sistemi yakında sizlerle
             </p>
@@ -500,7 +500,7 @@ export function LandingPage() {
                 <span className="font-bold text-xl text-foreground">CoachTale</span>
               </div>
               <p className="text-muted-foreground">
-                AI destekli TYT-AYT hazırlık platformu ile başarı hikayanizi yazın.
+                AI destekli TYT-AYT hazırlık platformu ile başarı hikayenizi yazın.
               </p>
             </div>
 
