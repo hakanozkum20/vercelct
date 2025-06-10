@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "CoachTale - AI Destekli TYT-AYT Hazırlık",
   description: "Yapay zeka destekli kişiselleştirilmiş çalışma planları ile TYT ve AYT'de başarıya ulaşın",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
