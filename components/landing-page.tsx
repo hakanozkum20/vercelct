@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,9 +21,20 @@ import {
   Zap,
   Shield,
   Clock,
+  X,
+  Check,
+  Crown,
+  Instagram,
+  Twitter,
+  Youtube,
+  Linkedin,
+  Apple,
+  Play,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { faApple, faGooglePlay } from "@fortawesome/free-brands-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const plans = [
   {
@@ -46,7 +57,7 @@ const plans = [
   {
     id: "standard",
     name: "Standart Plan",
-    price: "₺15",
+    price: "$10",
     period: "/ay",
     description: "En popüler seçim",
     features: [
@@ -66,7 +77,7 @@ const plans = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "₺25",
+    price: "$15",
     period: "/ay",
     description: "Maksimum performans",
     features: [
@@ -251,8 +262,8 @@ export function LandingPage() {
                 <div className="text-sm text-muted-foreground">Beta Kayıt</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">Q1 2024</div>
-                <div className="text-sm text-muted-foreground">Lansман</div>
+                <div className="text-2xl font-bold text-foreground">Q1 2025</div>
+                <div className="text-sm text-muted-foreground">Lansman</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-foreground">AI</div>
@@ -281,8 +292,24 @@ export function LandingPage() {
             {features.map((feature, index) => (
               <Card key={index} className="border-border hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
+                  <div className={cn(
+                    "w-12 h-12 rounded-lg flex items-center justify-center mb-4",
+                    index === 0 && "bg-blue-500/10",
+                    index === 1 && "bg-purple-500/10",
+                    index === 2 && "bg-green-500/10",
+                    index === 3 && "bg-orange-500/10",
+                    index === 4 && "bg-red-500/10",
+                    index === 5 && "bg-pink-500/10"
+                  )}>
+                    <feature.icon className={cn(
+                      "w-6 h-6",
+                      index === 0 && "text-blue-500",
+                      index === 1 && "text-purple-500",
+                      index === 2 && "text-green-500",
+                      index === 3 && "text-orange-500",
+                      index === 4 && "text-red-500",
+                      index === 5 && "text-pink-500"
+                    )} />
                   </div>
                   <CardTitle className="text-foreground">{feature.title}</CardTitle>
                 </CardHeader>
@@ -299,131 +326,149 @@ export function LandingPage() {
       <section id="pricing" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Size Uygun Planı Seçin</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              İhtiyaçlarınıza göre tasarlanmış esnek fiyatlandırma seçenekleri
+            <h2 className="text-3xl font-bold mb-4">Fiyatlandırma</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              İhtiyacınıza en uygun planı seçin ve hemen başlayın.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card
-                key={plan.id}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center">
+            {plans.map((plan) => (
+              <div 
+                key={plan.id} 
                 className={cn(
-                  "relative border-border transition-all duration-500 ease-out group cursor-pointer",
-                  "hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:scale-105",
-                  "hover:border-primary/50 hover:bg-gradient-to-br hover:from-background hover:to-primary/5",
-                  "animate-in fade-in slide-in-from-bottom-8",
-                  plan.popular && "border-primary shadow-lg scale-105 bg-gradient-to-br from-background to-primary/5",
-                  plan.popular && "hover:shadow-primary/20 hover:border-primary hover:scale-110",
+                  "relative h-[600px] w-full max-w-md mx-auto [perspective:1000px] group",
+                  plan.popular && "border-primary"
                 )}
-                style={{
-                  animationDelay: `${index * 150}ms`,
-                  animationDuration: "600ms",
-                  animationFillMode: "both",
-                }}
               >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <Badge className="bg-primary text-primary-foreground shadow-lg animate-pulse">En Popüler</Badge>
-                  </div>
-                )}
-
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                {/* Border glow effect */}
-                <div className="absolute inset-0 rounded-lg border border-primary/0 group-hover:border-primary/30 transition-all duration-500" />
-
-                <CardHeader className="text-center relative z-10">
-                  <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                    <CardTitle className="text-foreground group-hover:text-primary transition-colors duration-300">
-                      {plan.name}
-                    </CardTitle>
-                  </div>
-
-                  <div className="mt-4 transform group-hover:scale-105 transition-transform duration-300">
-                    <span className="text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                      {plan.price}
-                    </span>
-                    {plan.period && (
-                      <span className="text-muted-foreground group-hover:text-primary/70 transition-colors duration-300">
-                        {plan.period}
-                      </span>
-                    )}
-                  </div>
-
-                  <CardDescription className="group-hover:text-foreground transition-colors duration-300">
-                    {plan.description}
-                  </CardDescription>
-
-                  <Badge
-                    variant="outline"
-                    className="mt-2 group-hover:border-primary group-hover:text-primary transition-all duration-300"
-                  >
-                    {plan.aiFeatures}
-                  </Badge>
-                </CardHeader>
-
-                <CardContent className="space-y-4 relative z-10">
-                  <div className="space-y-2">
-                    {plan.features.map((feature, featureIndex) => (
-                      <div
-                        key={featureIndex}
-                        className="flex items-center gap-2 transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300"
-                        style={{
-                          transitionDelay: `${featureIndex * 50}ms`,
-                        }}
-                      >
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                        <span className="text-sm text-foreground group-hover:text-foreground/90 transition-colors duration-300">
-                          {feature}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {plan.limitations.length > 0 && (
-                    <div className="space-y-2 pt-4 border-t border-border group-hover:border-primary/30 transition-colors duration-300">
-                      {plan.limitations.map((limitation, limitIndex) => (
-                        <div
-                          key={limitIndex}
-                          className="flex items-center gap-2 transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300"
-                          style={{
-                            transitionDelay: `${(plan.features.length + limitIndex) * 50}ms`,
-                          }}
-                        >
-                          <div className="w-4 h-4 rounded-full border border-muted-foreground flex-shrink-0 group-hover:border-primary/50 transition-colors duration-300" />
-                          <span className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-300">
-                            {limitation}
-                          </span>
+                <div className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                  {/* Front of card - Sadece temel bilgiler */}
+                  <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(0deg)]">
+                    <Card className="h-full border-border hover:shadow-lg">
+                      <div className="h-full flex flex-col items-center justify-center p-6">
+                        <div className="text-center">
+                          <h3 className="text-2xl font-bold mb-4">{plan.name}</h3>
+                          <div className="flex items-baseline justify-center gap-1 mb-6">
+                            <span className="text-4xl font-bold">{plan.price}</span>
+                            <span className="text-muted-foreground">/ay</span>
+                          </div>
+                          <p className="text-muted-foreground mb-8">{plan.description}</p>
+                          <Button 
+                            className={cn(
+                              "w-full transform transition-all duration-300",
+                              "hover:scale-105 hover:shadow-lg hover:shadow-primary/25",
+                              plan.popular
+                                ? "bg-primary hover:bg-primary/90 hover:shadow-primary/40"
+                                : "hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                            )}
+                            variant={plan.popular ? "default" : "outline"}
+                            onClick={() => handlePlanSelect(plan.id)}
+                          >
+                            <span className="hover:scale-105 transition-transform duration-200">
+                              {plan.popular ? "Hemen Başla" : "Planı Seç"}
+                            </span>
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    </Card>
+                  </div>
 
-                  <Button
-                    className={cn(
-                      "w-full mt-6 transform transition-all duration-300 group-hover:scale-105",
-                      "group-hover:shadow-lg group-hover:shadow-primary/25",
-                      plan.popular
-                        ? "bg-primary hover:bg-primary/90 group-hover:bg-primary group-hover:shadow-primary/40"
-                        : "group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary",
-                    )}
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => handlePlanSelect(plan.id)}
-                  >
-                    <span className="group-hover:scale-105 transition-transform duration-200">{plan.buttonText}</span>
-                  </Button>
-                </CardContent>
+                  {/* Back of card - Tüm özellikler */}
+                  <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    <Card 
+                      className="h-full border-border hover:shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, 
+                          ${plan.popular ? 'rgba(var(--primary) / 0.1)' : 'rgba(var(--muted) / 0.1)'}, 
+                          transparent)`,
+                      }}
+                    >
+                      <div className="h-full flex flex-col p-6">
+                        <div className="flex items-center justify-center mb-6">
+                          {plan.popular ? (
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 rounded-full blur-xl animate-pulse" />
+                              <Crown className="w-12 h-12 animate-bounce" style={{ 
+                                animationDuration: '2s',
+                                color: 'rgb(var(--primary))',
+                                filter: 'drop-shadow(0 0 8px rgba(var(--primary), 0.5))'
+                              }} />
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/20 to-pink-500/30 rounded-full blur-xl animate-pulse" />
+                              <Star className="w-12 h-12 animate-[spin_3s_linear_infinite]" style={{
+                                color: 'rgb(var(--primary))',
+                                filter: 'drop-shadow(0 0 8px rgba(var(--primary), 0.3))'
+                              }} />
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-4 flex-grow overflow-y-auto">
+                          <div className="space-y-3">
+                            <h4 className="font-medium text-sm text-muted-foreground">Temel Özellikler</h4>
+                            <ul className="space-y-2">
+                              {plan.features.slice(0, 3).map((feature, index) => (
+                                <li key={index} className="flex items-center gap-2 text-sm group/item">
+                                  <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
+                                  <span className="group-hover/item:text-foreground/90 transition-colors">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
 
-                {/* Floating particles effect on hover */}
-                <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
-                  <div className="absolute top-4 right-4 w-2 h-2 bg-primary/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-500" />
-                  <div className="absolute bottom-6 left-6 w-1 h-1 bg-primary/40 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-700" />
-                  <div className="absolute top-1/2 left-4 w-1.5 h-1.5 bg-primary/20 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce transition-opacity duration-600" />
+                          <div className="space-y-3">
+                            <h4 className="font-medium text-sm text-muted-foreground">Ek Özellikler</h4>
+                            <ul className="space-y-2">
+                              {plan.features.slice(3).map((feature, index) => (
+                                <li key={index} className="flex items-center gap-2 text-sm group/item">
+                                  <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform" />
+                                  <span className="group-hover/item:text-foreground/90 transition-colors">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {plan.limitations && plan.limitations.length > 0 && (
+                            <div className="space-y-3 pt-4 border-t border-border">
+                              <h4 className="font-medium text-sm text-muted-foreground">Bu planda olmayan özellikler</h4>
+                              <ul className="space-y-2">
+                                {plan.limitations.map((limitation, index) => (
+                                  <li key={index} className="flex items-center gap-2 text-sm group/item">
+                                    <div className="w-4 h-4 rounded-full border border-muted-foreground flex-shrink-0 group-hover/item:border-primary/50 transition-colors" />
+                                    <span className="text-muted-foreground group-hover/item:text-muted-foreground/80 transition-colors">
+                                      {limitation}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-4 mt-auto">
+                          <Button 
+                            className={cn(
+                              "w-full transform transition-all duration-300",
+                              "hover:scale-105 hover:shadow-lg hover:shadow-primary/25",
+                              plan.popular
+                                ? "bg-primary hover:bg-primary/90 hover:shadow-primary/40"
+                                : "hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                            )}
+                            variant={plan.popular ? "default" : "outline"}
+                            onClick={() => handlePlanSelect(plan.id)}
+                          >
+                            <span className="hover:scale-105 transition-transform duration-200">
+                              {plan.popular ? "Hemen Başla" : "Planı Seç"}
+                            </span>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
@@ -441,19 +486,32 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-border">
+              <Card 
+                key={index} 
+                className="border-border hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 group relative after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-gradient-to-r after:from-primary/0 after:via-primary/20 after:to-primary/0 after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-300"
+              >
                 <CardHeader>
                   <div className="flex items-center gap-1 mb-2">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star 
+                        key={i} 
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+                        style={{ transitionDelay: `${i * 50}ms` }}
+                      />
                     ))}
                   </div>
-                  <CardDescription className="text-foreground italic">"{testimonial.content}"</CardDescription>
+                  <CardDescription className="text-foreground italic group-hover:text-primary/90 transition-colors duration-300">
+                    "{testimonial.content}"
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div>
-                    <div className="font-semibold text-foreground">{testimonial.name}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                  <div className="transform group-hover:translate-x-1 transition-transform duration-300">
+                    <div className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                      {testimonial.name}
+                    </div>
+                    <div className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-300">
+                      {testimonial.role}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -484,8 +542,30 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Mobil Uygulama Tanıtımı */}
+      <section className="py-20 px-4 bg-muted/50">
+        <div className="container mx-auto text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Mobil Uygulamamızı Keşfedin</h2>
+            <p className="text-xl text-muted-foreground mb-8">
+              CoachTale mobil uygulaması ile her an, her yerde çalışın. App Store ve Google Play'den hemen indirin!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="outline" className="text-lg px-8 flex items-center gap-2">
+                <FontAwesomeIcon icon={faApple} className="h-8 w-8 text-black dark:text-white" />
+                App Store
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 flex items-center gap-2">
+                <FontAwesomeIcon icon={faGooglePlay} className="h-8 w-8 text-green-500" />
+                Google Play
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 py-12 px-4">
+      <footer className="py-12 px-4 border-t border-border">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -553,34 +633,38 @@ export function LandingPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-foreground mb-4">Yasal</h3>
+              <h3 className="font-semibold text-foreground mb-4">Sosyal Medya</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Gizlilik
+                  <a href="#" className="hover:text-foreground transition-colors flex items-center gap-2">
+                    <Instagram className="w-5 h-5 text-pink-500" />
+                    Instagram
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Şartlar
+                  <a href="#" className="hover:text-foreground transition-colors flex items-center gap-2">
+                    <Twitter className="w-5 h-5 text-blue-400" />
+                    Twitter
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    KVKK
+                  <a href="#" className="hover:text-foreground transition-colors flex items-center gap-2">
+                    <Youtube className="w-5 h-5 text-red-500" />
+                    YouTube
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Çerezler
+                  <a href="#" className="hover:text-foreground transition-colors flex items-center gap-2">
+                    <Linkedin className="w-5 h-5 text-blue-600" />
+                    LinkedIn
                   </a>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 CoachTale. Tüm hakları saklıdır.</p>
+          <div className="mt-8 text-center text-muted-foreground">
+            <p>&copy; 2025 CoachTale. Tüm hakları saklıdır.</p>
           </div>
         </div>
       </footer>
