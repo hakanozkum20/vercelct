@@ -273,7 +273,9 @@ export function ExamTracker() {
 
   const getTopics = () => {
     if (!formData.examType || !formData.subject) return []
-    return examStructure[formData.examType as keyof typeof examStructure][formData.subject] || []
+    const examType = formData.examType as keyof typeof examStructure
+    const subject = formData.subject as keyof (typeof examStructure)[typeof examType]
+    return examStructure[examType][subject] || []
   }
 
   const getPerformanceColor = (score: number, total: number) => {
@@ -514,7 +516,7 @@ export function ExamTracker() {
                           <SelectValue placeholder="Konu seçiniz" />
                         </SelectTrigger>
                         <SelectContent>
-                          {getTopics().map((topic) => (
+                          {getTopics().map((topic: string) => (
                             <SelectItem key={topic} value={topic}>
                               {topic}
                             </SelectItem>

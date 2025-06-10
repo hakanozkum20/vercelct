@@ -1,15 +1,17 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Brain, Calendar, Clock, Users, ArrowRight, Sparkles } from "lucide-react"
+import { Brain, Calendar, Clock, Users, ArrowRight, Sparkles, Target, Zap } from "lucide-react"
 
 export function Hero() {
   return (
     <section className="relative py-20 px-4 overflow-hidden">
       {/* Arka plan desenleri */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:20px_20px]" />
       </div>
 
@@ -33,14 +35,36 @@ export function Hero() {
           </div>
 
           {/* Ana Başlık */}
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-gradient">
-            Çalışma Asistanınız
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent animate-gradient">
+              Çalışma Asistanınız
+            </span>
           </h1>
 
           {/* Açıklama */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Yapay zeka destekli kişisel çalışma asistanınız ile hedeflerinize ulaşın
           </p>
+
+          {/* Özellikler */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 group">
+              <Target className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-sm font-medium text-foreground">Hedef Odaklı</span>
+            </div>
+            <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 group">
+              <Brain className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-sm font-medium text-foreground">AI Destekli</span>
+            </div>
+            <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 group">
+              <Zap className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-sm font-medium text-foreground">Hızlı Sonuç</span>
+            </div>
+            <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 group">
+              <Users className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-sm font-medium text-foreground">Topluluk</span>
+            </div>
+          </div>
 
           {/* Butonlar */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -97,8 +121,8 @@ export function Hero() {
               <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">AI Desteği</div>
             </div>
             <div className="text-center group">
-              <div className="text-3xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform duration-300">100%</div>
-              <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">Memnuniyet</div>
+              <div className="text-3xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform duration-300">%50</div>
+              <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">Erken İndirim</div>
             </div>
           </div>
         </div>

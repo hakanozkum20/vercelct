@@ -1,11 +1,13 @@
 "use client"
 
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { BarChart3, Eye, Plus, TrendingUp, BookOpen, Target, Award, Calendar } from "lucide-react"
+import { BarChart3, Eye, Plus, TrendingUp, BookOpen, Target, Award, Calendar, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Progress } from "@/components/ui/progress"
 
 // Mock data for exam results
 const examData = {
@@ -281,10 +283,12 @@ export function Dashboard() {
                   <CardTitle className="text-foreground">Son Sınavlar</CardTitle>
                   <CardDescription>Son 5 deneme sonucunuz</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => (window.location.href = "/exam-tracker")}>
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Tümünü Gör
-                </Button>
+                <Link href="/dashboard/exam-tracker">
+                  <Button variant="outline" size="sm">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Tümünü Gör
+                  </Button>
+                </Link>
               </div>
             </CardHeader>
             <CardContent>

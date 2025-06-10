@@ -34,7 +34,12 @@ export function Header() {
             <Clock className="w-4 h-4 mr-2" />
             Yakında
           </Button>
-          <Button size="sm" onClick={() => (window.location.href = "/auth")}>
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="opacity-50 cursor-not-allowed"
+            disabled
+          >
             Giriş Yap
           </Button>
         </div>

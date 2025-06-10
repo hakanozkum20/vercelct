@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dashboard } from "@/components/dashboard/dashboard"
+import { ExamTracker } from "@/components/exam-tracker"
 import { Layout } from "@/components/layout"
 
-export default function DashboardPage() {
+export default function ExamTrackerPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <Dashboard />
+      <ExamTracker />
     </Layout>
   )
 }
