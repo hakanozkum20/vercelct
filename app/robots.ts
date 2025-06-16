@@ -4,9 +4,33 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
-      disallow: ['/private/', '/admin/'],
+      allow: [
+        '/',
+        '/features',
+        '/pricing',
+        '/testimonials',
+        '/mobile-app',
+        '/exam-tracker',
+        '/blog',
+        '/blog/*',
+        '/help',
+        '/help/faq',
+        '/help/contact',
+      ],
+      disallow: [
+        '/api/*',
+        '/admin/*',
+        '/dashboard/*',
+        '/settings/*',
+        '/profile/*',
+        '/auth/*',
+        '/_next/*',
+        '/static/*',
+        '/*.json$',
+        '/*.xml$',
+      ],
     },
     sitemap: 'https://coachtale.com/sitemap.xml',
+    host: 'https://coachtale.com',
   }
 } 
