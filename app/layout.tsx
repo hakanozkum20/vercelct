@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { NavigationGuard } from "@/components/navigation-guard"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -93,6 +94,7 @@ export default function RootLayout({
         >
           <NavigationGuard />
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
