@@ -9,15 +9,12 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['@fortawesome/fontawesome-svg-core', '@fortawesome/free-brands-svg-icons', '@fortawesome/react-fontawesome'],
-    serverActions: true,
-    serverComponentsExternalPackages: ['sharp'],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
   headers: async () => {
@@ -58,7 +55,6 @@ const nextConfig = {
     ]
   },
   webpack: (config, { dev, isServer }) => {
-    // Production optimizations
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
