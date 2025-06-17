@@ -1,9 +1,11 @@
+export const dynamic = "force-dynamic"
+
 import { redirect } from "next/navigation"
 import { Dashboard } from "@/components/dashboard/dashboard"
 import { Layout } from "@/components/layout"
 import { createClient } from "@/utils/supabase/server"
 
-export default async function DashboardPage() {
+async function DashboardPage() {
   const supabase = await createClient()
 
   const {
@@ -31,3 +33,5 @@ export default async function DashboardPage() {
     </Layout>
   )
 }
+
+export default DashboardPage
