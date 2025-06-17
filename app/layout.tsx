@@ -5,16 +5,13 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { NavigationGuard } from "@/components/navigation-guard"
 import { Analytics } from "@vercel/analytics/next"
-import { Suspense } from "react"
-// Import UserProvider
-import { UserProvider } from "@/components/user-context"
+import { Suspense } from "react" // Suspense'i import et
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "CoachTale - Yapay Zeka Destekli Sınav Takip ve Ders Çalışma Planı | TYT AYT Hazırlık",
-  description:
-    "TYT ve AYT sınavlarına hazırlanan öğrenciler için yapay zeka destekli kişiselleştirilmiş çalışma planları. Akıllı sınav takibi, AI destekli öneriler ve motivasyon asistanı ile hedefinize ulaşın. Ücretsiz deneyin!",
+  description: "Yapay zeka destekli kişiselleştirilmiş çalışma planları ile TYT ve AYT'de başarıya ulaşın",
   keywords:
     "tyt hazırlık, ayt hazırlık, sınav takip, ders çalışma planı, öğrenci takip, eğitim yönetimi, akademik takip, öğrenci başarı takibi, ders programı, sınav hazırlık, eğitim planlama, akademik başarı, yapay zeka eğitim, ai destekli çalışma",
   authors: [{ name: "CoachTale", url: "https://coachtale.com" }],
@@ -98,14 +95,12 @@ export default function RootLayout({
           storageKey="coachtale-theme"
         >
           <Suspense fallback={null}>
-            <UserProvider>
-              {" "}
-              {/* Wrap children with UserProvider */}
-              <NavigationGuard />
-              {children}
-            </UserProvider>
-            <Analytics />
+            {" "}
+            {/* Suspense sınırını ekle */}
+            <NavigationGuard />
+            {children}
           </Suspense>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

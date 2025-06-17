@@ -3,49 +3,25 @@
 import { useState, useEffect } from "react"
 import { AuthPage } from "@/components/auth-page"
 
-// Import Supabase client
-import { createBrowserClient } from "@/lib/supabase"
-import { useRouter } from "next/navigation" // Import useRouter
-
 export default function AuthPageRoute() {
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter() // Initialize useRouter
 
   useEffect(() => {
-    const supabase = createBrowserClient()
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session) {
-        // Redirect to dashboard if already authenticated
-        router.push("/dashboard")
-      } else {
-        setIsLoading(false)
-      }
+    // Check if already authenticated
+    const authStatus = localStorage.getItem("isAuthenticated")
+    if (authStatus === "true") {
+      // Redirect to dashboard if already authenticated
+      window.location.href = "/dashboard"
+    } else {
+      setIsLoading(false)
     }
-
-    checkAuth()
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        router.push("/dashboard")
-      } else {
-        setIsLoading(false)
-      }
-    })
-
-    return () => {
-      authListener?.unsubscribe()
-    }
-  }, [router])
+  }, [])
 
   const handleAuthenticated = () => {
-    // Supabase'in oturumu yönetmesine izin veriyoruz, bu fonksiyon sadece yönlendirmeyi tetikleyecek.
-    // onAuthStateChange zaten yönlendirmeyi yapacağı için burada ekstra bir şey yapmaya gerek kalmayabilir,
-    // ancak yine de bir fallback olarak bırakabiliriz.
-    router.push("/dashboard")
+    // Set authentication status
+    localStorage.setItem("isAuthenticated", "true")
+    // Redirect to dashboard
+    window.location.href = "/dashboard"
   }
 
   if (isLoading) {

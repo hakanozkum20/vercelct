@@ -3,9 +3,6 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-// Import Supabase client
-import { createBrowserClient } from "@/lib/supabase"
-import { useRouter } from "next/navigation" // Import useRouter
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -14,38 +11,20 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter() // Initialize useRouter
 
   useEffect(() => {
-    const supabase = createBrowserClient()
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session) {
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem("isAuthenticated")
+      if (authStatus === "true") {
         setIsAuthenticated(true)
       } else {
-        router.push("/auth")
+        window.location.href = "/auth"
       }
       setIsLoading(false)
     }
 
     checkAuth()
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setIsAuthenticated(true)
-      } else {
-        router.push("/auth")
-      }
-      setIsLoading(false)
-    })
-
-    return () => {
-      authListener?.unsubscribe()
-    }
-  }, [router])
+  }, [])
 
   if (isLoading) {
     return (
@@ -59,7 +38,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return null // Or a loading spinner, but redirect is handled by useEffect
+    return null
   }
 
   return <>{children}</>
