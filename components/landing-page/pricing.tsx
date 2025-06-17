@@ -234,4 +234,4 @@ export function Pricing() {
       </Dialog>
     </section>
   )
-} 
+}

@@ -26,4 +26,4 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-} 
+}

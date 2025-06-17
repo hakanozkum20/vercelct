@@ -51,4 +51,4 @@ export function Header({ title, description, onMenuClick }: HeaderProps) {
       </div>
     </header>
   )
-} 
+}

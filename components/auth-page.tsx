@@ -10,6 +10,10 @@ import { Card } from "@/components/ui/card"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// Import Supabase client
+import { createBrowserClient } from "@/lib/supabase"
+import { useRouter } from "next/navigation" // Import useRouter
+
 interface AuthPageProps {
   onAuthenticated: () => void
 }
@@ -19,16 +23,58 @@ export function AuthPage({ onAuthenticated }: AuthPageProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Inside AuthPage component
+  const router = useRouter() // Initialize useRouter
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    const supabase = createBrowserClient()
+    const emailInput = (e.currentTarget.elements.namedItem(isSignUp ? "signup-email" : "email") as HTMLInputElement)
+      .value
+    const passwordInput = (
+      e.currentTarget.elements.namedItem(isSignUp ? "signup-password" : "password") as HTMLInputElement
+    ).value
+    const nameInput = isSignUp ? (e.currentTarget.elements.namedItem("name") as HTMLInputElement)?.value : null
+
+    let error = null
+    if (isSignUp) {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: emailInput,
+        password: passwordInput,
+        options: {
+          data: {
+            full_name: nameInput, // Supabase Auth user metadata
+          },
+        },
+      })
+      error = signUpError
+    } else {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: emailInput,
+        password: passwordInput,
+      })
+      error = signInError
+    }
+
+    setIsLoading(false)
+
+    if (error) {
+      console.error("Authentication error:", error.message)
+      alert(`Hata: ${error.message}`) // Kullanıcıya hata mesajı göster
+    } else {
+      // Supabase Auth otomatik olarak session'ı yönetir.
+      // Başarılı giriş/kayıt sonrası onAuthenticated çağrılır.
       onAuthenticated()
-    }, 1500)
+    }
   }
+
+  // Remove the setTimeout simulation as Supabase handles async operations
+  // setTimeout(() => {
+  //   setIsLoading(false)
+  //   onAuthenticated()
+  // }, 1500)
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp)

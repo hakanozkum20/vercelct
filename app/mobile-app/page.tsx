@@ -9,4 +9,4 @@ export const metadata: Metadata = {
 
 export default function MobileAppPage() {
   return <MobileApp />
-} 
+}

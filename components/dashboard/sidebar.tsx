@@ -124,4 +124,4 @@ export function Sidebar({ isOpen }: SidebarProps) {
       </div>
     </div>
   )
-} 
+}

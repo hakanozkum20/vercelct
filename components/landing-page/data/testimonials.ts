@@ -24,4 +24,4 @@ export const testimonials: Testimonial[] = [
     content: "Motivasyon AI'ı sayesinde çalışma disiplinimi koruyabiliyorum. Harika bir uygulama!",
     rating: 5,
   },
-] 
+]

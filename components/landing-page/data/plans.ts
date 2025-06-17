@@ -70,4 +70,4 @@ export const plans: Plan[] = [
     popular: false,
     aiFeatures: "Ultra AI",
   },
-] 
+]

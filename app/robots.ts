@@ -48,4 +48,4 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: 'https://coachtale.com/sitemap.xml',
     host: 'https://coachtale.com',
   }
-} 
+}

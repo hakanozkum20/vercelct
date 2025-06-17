@@ -37,4 +37,4 @@ export const features: Feature[] = [
     title: "Sosyal Özellikler",
     description: "Arkadaşlarınızla yarışın, liderlik tablolarında yerinizi alın.",
   },
-] 
+]
