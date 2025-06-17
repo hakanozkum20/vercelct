@@ -1,39 +1,17 @@
-"use client"
-
-import { useState, useEffect } from "react"
+import { redirect } from "next/navigation"
 import { AuthPage } from "@/components/auth-page"
+import { createClient } from "@/utils/supabase/server"
 
-export default function AuthPageRoute() {
-  const [isLoading, setIsLoading] = useState(true)
+export default async function AuthPageRoute() {
+  const supabase = await createClient()
 
-  useEffect(() => {
-    // Check if already authenticated
-    const authStatus = localStorage.getItem("isAuthenticated")
-    if (authStatus === "true") {
-      // Redirect to dashboard if already authenticated
-      window.location.href = "/dashboard"
-    } else {
-      setIsLoading(false)
-    }
-  }, [])
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  const handleAuthenticated = () => {
-    // Set authentication status
-    localStorage.setItem("isAuthenticated", "true")
-    // Redirect to dashboard
-    window.location.href = "/dashboard"
+  if (session) {
+    redirect("/dashboard")
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <span className="text-muted-foreground">Kontrol ediliyor...</span>
-        </div>
-      </div>
-    )
-  }
-
-  return <AuthPage onAuthenticated={handleAuthenticated} />
+  return <AuthPage />
 }

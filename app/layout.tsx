@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { NavigationGuard } from "@/components/navigation-guard"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react" // Suspense'i import et
 
@@ -97,7 +96,6 @@ export default function RootLayout({
           <Suspense fallback={null}>
             {" "}
             {/* Suspense sınırını ekle */}
-            <NavigationGuard />
             {children}
           </Suspense>
           <Analytics />

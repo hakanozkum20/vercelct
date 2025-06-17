@@ -9,29 +9,60 @@ import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/utils/supabase/client"
+import { useRouter } from "next/navigation"
 
-interface AuthPageProps {
-  onAuthenticated: () => void
-}
-
-export function AuthPage({ onAuthenticated }: AuthPageProps) {
+export function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError(null)
 
-    // Simulate API call
-    setTimeout(() => {
+    const form = e.currentTarget as HTMLFormElement
+    const email = (form.elements.namedItem(isSignUp ? "signup-email" : "email") as HTMLInputElement).value
+    const password = (form.elements.namedItem(isSignUp ? "signup-password" : "password") as HTMLInputElement).value
+    const name = isSignUp ? (form.elements.namedItem("name") as HTMLInputElement)?.value : undefined
+
+    let authError = null
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      })
+      authError = error
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      authError = error
+    }
+
+    if (authError) {
+      setError(authError.message)
       setIsLoading(false)
-      onAuthenticated()
-    }, 1500)
+    } else {
+      // Başarılı giriş/kayıt sonrası oturumu yenile
+      router.refresh()
+    }
   }
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp)
+    setError(null) // Mod değiştiğinde hatayı temizle
   }
 
   return (
@@ -117,6 +148,12 @@ export function AuthPage({ onAuthenticated }: AuthPageProps) {
                     Kayıt Ol
                   </button>
                 </div>
+
+                {error && (
+                  <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-md p-3 mb-4 text-sm text-center">
+                    {error}
+                  </div>
+                )}
 
                 {/* Form Container with Slide Animation */}
                 <div className="relative overflow-hidden">

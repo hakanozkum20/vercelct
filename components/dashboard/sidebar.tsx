@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { usePathname, useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -25,13 +24,18 @@ import {
   Calendar,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/utils/supabase/client"
 
 interface SidebarProps {
   isOpen: boolean
+  userFullName: string // Yeni prop
+  userEmail: string // Yeni prop
 }
 
-export function Sidebar({ isOpen }: SidebarProps) {
+export function Sidebar({ isOpen, userFullName, userEmail }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
 
   const sidebarItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
@@ -45,13 +49,23 @@ export function Sidebar({ isOpen }: SidebarProps) {
     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
   ]
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.refresh()
+  }
+
+  // Avatar fallback için baş harfleri al
+  const getInitials = (name: string) => {
+    if (!name) return "JD" // Default if name is empty
+    const parts = name.split(" ")
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    }
+    return parts[0][0].toUpperCase()
+  }
+
   return (
-    <div
-      className={cn(
-        "bg-card border-r border-border flex flex-col shadow-premium",
-        isOpen ? "w-64" : "w-20",
-      )}
-    >
+    <div className={cn("bg-card border-r border-border flex flex-col shadow-premium", isOpen ? "w-64" : "w-20")}>
       {/* Logo */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
@@ -74,7 +88,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
                   pathname === item.href
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                  !isOpen && "justify-center px-2"
+                  !isOpen && "justify-center px-2",
                 )}
                 prefetch={false}
               >
@@ -93,12 +107,12 @@ export function Sidebar({ isOpen }: SidebarProps) {
             <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent">
               <Avatar className="w-8 h-8">
                 <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback className="bg-primary/10 text-primary">JD</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary">{getInitials(userFullName)}</AvatarFallback>
               </Avatar>
               {isOpen && (
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-medium text-foreground">John Doe</p>
-                  <p className="text-xs text-muted-foreground">john@example.com</p>
+                  <p className="text-sm font-medium text-foreground">{userFullName}</p>
+                  <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
               )}
               {isOpen && <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -111,14 +125,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
             <DropdownMenuItem>Ayarlar</DropdownMenuItem>
             <DropdownMenuItem>Destek</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                localStorage.removeItem("isAuthenticated")
-                window.location.href = "/"
-              }}
-            >
-              Çıkış Yap
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>Çıkış Yap</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

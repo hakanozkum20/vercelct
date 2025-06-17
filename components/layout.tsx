@@ -1,48 +1,24 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import type React from "react"
+
+import { useState } from "react"
 import { Header } from "@/components/dashboard/header"
 import { Sidebar } from "@/components/dashboard/sidebar"
-import { Progress } from "@/components/ui/progress"
 
 interface LayoutProps {
   children: React.ReactNode
+  userFullName: string // Yeni prop
+  userEmail: string // Yeni prop
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, userFullName, userEmail }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-
-  useEffect(() => {
-    const auth = localStorage.getItem("isAuthenticated")
-    if (!auth) {
-      router.push("/auth")
-    } else {
-      setIsAuthenticated(true)
-    }
-    setIsLoading(false)
-  }, [router])
-
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
-        <Progress value={75} className="w-[200px]" />
-        <p className="text-sm text-muted-foreground">Yükleniyor...</p>
-      </div>
-    )
-  }
-
-  if (!isAuthenticated) {
-    return null
-  }
 
   return (
     <div className="h-screen flex overflow-hidden bg-background">
       {/* Sabit Sidebar */}
-      <Sidebar isOpen={sidebarOpen} />
+      <Sidebar isOpen={sidebarOpen} userFullName={userFullName} userEmail={userEmail} />
 
       {/* Ana İçerik Alanı */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -54,9 +30,7 @@ export function Layout({ children }: LayoutProps) {
         />
 
         {/* Kaydırılabilir İçerik */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   )

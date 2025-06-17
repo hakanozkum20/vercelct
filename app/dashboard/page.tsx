@@ -1,42 +1,32 @@
-"use client"
-
-import { useState, useEffect } from "react"
+import { redirect } from "next/navigation"
 import { Dashboard } from "@/components/dashboard/dashboard"
 import { Layout } from "@/components/layout"
+import { createClient } from "@/utils/supabase/server"
 
-export default function DashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+export default async function DashboardPage() {
+  const supabase = await createClient()
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const authStatus = localStorage.getItem("isAuthenticated")
-    if (authStatus === "true") {
-      setIsAuthenticated(true)
-    } else {
-      // Redirect to auth if not authenticated
-      window.location.href = "/auth"
-    }
-    setIsLoading(false)
-  }, [])
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <span className="text-muted-foreground">Yükleniyor...</span>
-        </div>
-      </div>
-    )
+  if (!session) {
+    redirect("/auth")
   }
 
-  if (!isAuthenticated) {
-    return null // Will redirect in useEffect
-  }
+  // Kullanıcının profil bilgilerini çek
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", session.user.id)
+    .single()
+
+  // Eğer profiles tablosundan full_name gelmezse, session.user.email'i kullan
+  const userFullName = profile?.full_name || session.user.email || "Kullanıcı"
+  const userEmail = session.user.email || ""
 
   return (
-    <Layout>
+    <Layout userFullName={userFullName} userEmail={userEmail}>
       <Dashboard />
     </Layout>
   )
