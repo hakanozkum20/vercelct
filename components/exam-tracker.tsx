@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,8 +18,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { BookOpen, Plus, TrendingUp, Target, Award, Edit, Trash2, Eye } from "lucide-react"
+import { BookOpen, Plus, TrendingUp, Target, Award, Edit, Trash2, Eye, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/utils/supabase/client"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // TYT-AYT Ders ve Konu Yapısı
 const examStructure = {
@@ -63,10 +70,12 @@ interface SubjectResult {
   wrong: number
   empty: number
   total: number
+  net_score: number
 }
 
 interface ExamResult {
   id: string
+  user_id?: string
   type: "deneme" | "test"
   examType: "TYT" | "AYT"
   date: string
@@ -78,42 +87,73 @@ interface ExamResult {
   empty: number
   total: number
   score: number
+  created_at?: string
+  updated_at?: string
 }
 
 export function ExamTracker() {
   const [activeTab, setActiveTab] = useState("add")
-  const [examResults, setExamResults] = useState<ExamResult[]>([
-    {
-      id: "1",
-      type: "deneme",
-      examType: "TYT",
-      date: "2024-01-15",
-      subjects: [
-        { subject: "Türkçe", correct: 25, wrong: 10, empty: 5, total: 40 },
-        { subject: "Matematik", correct: 20, wrong: 15, empty: 5, total: 40 },
-        { subject: "Fen Bilimleri", correct: 15, wrong: 5, empty: 0, total: 20 },
-        { subject: "Sosyal Bilimler", correct: 15, wrong: 3, empty: 2, total: 20 },
-      ],
-      correct: 75,
-      wrong: 33,
-      empty: 12,
-      total: 120,
-      score: 425.5,
-    },
-    {
-      id: "2",
-      type: "test",
-      examType: "AYT",
-      date: "2024-01-14",
-      subject: "Matematik",
-      topic: "Fonksiyonlar",
-      correct: 8,
-      wrong: 2,
-      empty: 0,
-      total: 10,
-      score: 36.0,
-    },
-  ])
+  const [examResults, setExamResults] = useState<ExamResult[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchExamResults = async () => {
+      const { data, error: authError } = await supabase.auth.getUser();
+      const user = data?.user;
+
+      if (authError || !user) {
+        setError("Kullanıcı girişi yapılmamış veya kimlik doğrulama hatası oluştu.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: examData, error: examError } = await supabase
+        .from("exam_results")
+        .select(`
+          *,
+          subjects:exam_subject_results(*)
+        `)
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
+      if (examError) {
+        console.error("Error fetching exam results:", examError)
+        setError("Sınav sonuçları getirilirken bir hata oluştu: " + examError.message)
+      } else {
+        const mappedResults: ExamResult[] = examData.map((result: any) => ({
+          id: result.id,
+          user_id: result.user_id,
+          type: result.type,
+          examType: result.exam_type,
+          date: result.date,
+          subject: result.subject,
+          topic: result.topic,
+          subjects: result.subjects ? result.subjects.map((sub: any) => ({
+            subject: sub.subject,
+            correct: sub.correct,
+            wrong: sub.wrong,
+            empty: sub.empty,
+            total: sub.total,
+            net_score: sub.net_score
+          })) : undefined,
+          correct: result.total_correct,
+          wrong: result.total_wrong,
+          empty: result.total_empty,
+          total: result.total_questions,
+          score: result.total_score,
+          created_at: result.created_at,
+          updated_at: result.updated_at,
+        }));
+        setExamResults(mappedResults)
+      }
+      setLoading(false)
+    }
+
+    fetchExamResults()
+  }, [])
 
   // Form State
   const [formData, setFormData] = useState({
@@ -131,6 +171,10 @@ export function ExamTracker() {
   const [subjectResults, setSubjectResults] = useState<Record<string, SubjectResult>>({})
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [examToDeleteId, setExamToDeleteId] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -159,29 +203,40 @@ export function ExamTracker() {
   }
 
   const handleSubjectResultChange = (subject: string, field: string, value: string) => {
-    const numValue = Number.parseInt(value) || 0
+    const numValue = Number.parseInt(value) || 0;
 
     setSubjectResults((prev) => {
+      // Ensure all numeric fields are initialized to 0 for a new subject entry
+      const existingSubjectData = prev[subject] || {
+        subject: subject,
+        correct: 0,
+        wrong: 0,
+        empty: 0,
+        total: 0,
+        net_score: 0, // Ensure net_score is also initialized
+      };
+
       const updated = {
         ...prev,
         [subject]: {
-          ...prev[subject],
-          subject,
+          ...existingSubjectData,
           [field]: numValue,
         },
-      }
+      };
 
       // Auto calculate total for this subject
-      const subjectData = updated[subject]
+      const subjectData = updated[subject];
       if (field === "correct" || field === "wrong" || field === "empty") {
         updated[subject] = {
           ...subjectData,
           total: (subjectData.correct || 0) + (subjectData.wrong || 0) + (subjectData.empty || 0),
-        }
+        };
+        // Re-calculate net_score after total is updated
+        updated[subject].net_score = calculateScore(updated[subject].correct, updated[subject].wrong, formData.examType);
       }
 
-      return updated
-    })
+      return updated;
+    });
   }
 
   const calculateScore = (correct: number, wrong: number, examType: string) => {
@@ -205,66 +260,280 @@ export function ExamTracker() {
     )
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitError(null)
 
-    let newResult: ExamResult
+    try {
+      const { data: userData, error: authError } = await supabase.auth.getUser()
+      const user = userData?.user
 
-    if (formData.type === "deneme") {
-      const totals = calculateTotalFromSubjects()
-      const score = calculateScore(totals.correct, totals.wrong, formData.examType)
-
-      newResult = {
-        id: Date.now().toString(),
-        type: "deneme",
-        examType: formData.examType as "TYT" | "AYT",
-        date: new Date().toISOString().split("T")[0],
-        subjects: Object.values(subjectResults),
-        correct: totals.correct,
-        wrong: totals.wrong,
-        empty: totals.empty,
-        total: totals.total,
-        score,
+      if (authError || !user) {
+        throw new Error("Kullanıcı girişi yapılmamış veya kimlik doğrulama hatası oluştu.")
       }
-    } else {
-      const correct = Number.parseInt(formData.correct) || 0
-      const wrong = Number.parseInt(formData.wrong) || 0
-      const empty = Number.parseInt(formData.empty) || 0
-      const total = Number.parseInt(formData.total) || 0
-      const score = calculateScore(correct, wrong, formData.examType)
 
-      newResult = {
-        id: Date.now().toString(),
-        type: "test",
-        examType: formData.examType as "TYT" | "AYT",
-        date: new Date().toISOString().split("T")[0],
-        subject: formData.subject,
-        topic: formData.topic,
-        correct,
-        wrong,
-        empty,
-        total,
-        score,
+      let newResultData: any
+      let subjectResultsToInsert: any[] = []
+
+      if (formData.type === "deneme") {
+        const totals = calculateTotalFromSubjects()
+        const score = calculateScore(totals.correct, totals.wrong, formData.examType)
+
+        newResultData = {
+          user_id: user.id,
+          type: "deneme",
+          exam_type: formData.examType,
+          date: new Date().toISOString().split("T")[0],
+          total_correct: totals.correct,
+          total_wrong: totals.wrong,
+          total_empty: totals.empty,
+          total_questions: totals.total,
+          total_score: score,
+        }
+        subjectResultsToInsert = Object.values(subjectResults).map((sub) => ({
+          subject: sub.subject,
+          correct: sub.correct,
+          wrong: sub.wrong,
+          empty: sub.empty,
+          total: sub.total,
+          net_score: calculateScore(sub.correct, sub.wrong, formData.examType)
+        }))
+
+      } else {
+        const correct = Number.parseInt(formData.correct) || 0
+        const wrong = Number.parseInt(formData.wrong) || 0
+        const empty = Number.parseInt(formData.empty) || 0
+        const total = Number.parseInt(formData.total) || 0
+        const score = calculateScore(correct, wrong, formData.examType)
+
+        newResultData = {
+          user_id: user.id,
+          type: "test",
+          exam_type: formData.examType,
+          date: new Date().toISOString().split("T")[0],
+          subject: formData.subject,
+          topic: formData.topic,
+          total_correct: correct,
+          total_wrong: wrong,
+          total_empty: empty,
+          total_questions: total,
+          total_score: score,
+        }
       }
+
+      // exam_results tablosuna ekle
+      const { data: insertedExamResult, error: insertExamError } = await supabase
+        .from("exam_results")
+        .insert(newResultData)
+        .select()
+
+      if (insertExamError) {
+        throw insertExamError
+      }
+
+      // Deneme ise ders bazlı sonuçları ekle
+      if (formData.type === "deneme" && insertedExamResult && insertedExamResult.length > 0) {
+        const examResultId = insertedExamResult[0].id
+        const subjectDataWithExamId = subjectResultsToInsert.map(sub => ({
+          ...sub,
+          exam_result_id: examResultId
+        }))
+
+        const { error: insertSubjectsError } = await supabase
+          .from("exam_subject_results")
+          .insert(subjectDataWithExamId)
+
+        if (insertSubjectsError) {
+          throw insertSubjectsError
+        }
+      }
+
+      // Verileri yeniden çekerek UI'ı güncelle
+      const { data: updatedUserData, error: updatedAuthError } = await supabase.auth.getUser();
+      const updatedUser = updatedUserData?.user;
+
+      if (updatedAuthError || !updatedUser) {
+        setError("Kullanıcı verileri güncellenirken bir hata oluştu.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: updatedExamData, error: updatedExamError } = await supabase
+        .from("exam_results")
+        .select(`
+          *,
+          subjects:exam_subject_results(*)
+        `)
+        .eq('user_id', updatedUser.id) 
+        .order('date', { ascending: false });
+
+      if (updatedExamError) {
+        console.error("Error fetching updated exam results:", updatedExamError)
+        setError("Güncel sınav sonuçları getirilirken bir hata oluştu: " + updatedExamError.message)
+      } else {
+        const mappedResults: ExamResult[] = updatedExamData.map((result: any) => ({
+          id: result.id,
+          user_id: result.user_id,
+          type: result.type,
+          examType: result.exam_type,
+          date: result.date,
+          subject: result.subject,
+          topic: result.topic,
+          subjects: result.subjects ? result.subjects.map((sub: any) => ({
+            subject: sub.subject,
+            correct: sub.correct,
+            wrong: sub.wrong,
+            empty: sub.empty,
+            total: sub.total,
+            net_score: sub.net_score
+          })) : undefined,
+          correct: result.total_correct,
+          wrong: result.total_wrong,
+          empty: result.total_empty,
+          total: result.total_questions,
+          score: result.total_score,
+          created_at: result.created_at,
+          updated_at: result.updated_at,
+        }));
+        setExamResults(mappedResults);
+      }
+
+      // Formu ve state'leri sıfırla
+      setFormData({
+        type: "",
+        examType: "",
+        subject: "",
+        topic: "",
+        correct: "",
+        wrong: "",
+        empty: "",
+        total: "",
+      })
+      setSubjectResults({})
+      setIsDialogOpen(false)
+
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Sınav sonucu eklenirken hata:", err.message);
+        setSubmitError(err.message || "Sınav sonucu eklenirken beklenmeyen bir hata oluştu.");
+      } else {
+        console.error("Sınav sonucu eklenirken bilinmeyen bir hata oluştu:", err);
+        setSubmitError("Sınav sonucu eklenirken beklenmeyen bir hata oluştu.");
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setExamResults((prev) => [newResult, ...prev])
-
-    // Reset form
-    setFormData({
-      type: "",
-      examType: "",
-      subject: "",
-      topic: "",
-      correct: "",
-      wrong: "",
-      empty: "",
-      total: "",
-    })
-    setSubjectResults({})
-
-    setIsDialogOpen(false)
   }
+
+  const handleDelete = async () => {
+    if (!examToDeleteId) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Kullanıcı ID'sini al
+      const { data: userData, error: authError } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (authError || !user) {
+        throw new Error("Kullanıcı girişi yapılmamış veya kimlik doğrulama hatası oluştu.");
+      }
+
+      // Silinecek sınav sonucunun tipini kontrol et (deneme mi, test mi)
+      const { data: examResultToDelete, error: fetchError } = await supabase
+        .from('exam_results')
+        .select('type')
+        .eq('id', examToDeleteId)
+        .single();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      // Eğer deneme sınavı ise, ilişkili ders sonuçlarını da sil
+      if (examResultToDelete.type === 'deneme') {
+        const { error: deleteSubjectsError } = await supabase
+          .from('exam_subject_results')
+          .delete()
+          .eq('exam_result_id', examToDeleteId);
+
+        if (deleteSubjectsError) {
+          throw deleteSubjectsError;
+        }
+      }
+
+      // Ana sınav sonucunu sil
+      const { error: deleteExamError } = await supabase
+        .from('exam_results')
+        .delete()
+        .eq('id', examToDeleteId);
+
+      if (deleteExamError) {
+        throw deleteExamError;
+      }
+
+      // UI'ı güncellemek için verileri yeniden çek
+      const { data: updatedUserData, error: updatedAuthError } = await supabase.auth.getUser();
+      const updatedUser = updatedUserData?.user;
+
+      if (updatedAuthError || !updatedUser) {
+        setError("Kullanıcı verileri güncellenirken bir hata oluştu.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: updatedExamData, error: updatedExamError } = await supabase
+        .from("exam_results")
+        .select(`
+          *,
+          subjects:exam_subject_results(*)
+        `)
+        .eq('user_id', updatedUser.id) 
+        .order('date', { ascending: false });
+
+      if (updatedExamError) {
+        console.error("Error fetching updated exam results:", updatedExamError)
+        setError("Güncel sınav sonuçları getirilirken bir hata oluştu: " + updatedExamError.message)
+      } else {
+        const mappedResults: ExamResult[] = updatedExamData.map((result: any) => ({
+          id: result.id,
+          user_id: result.user_id,
+          type: result.type,
+          examType: result.exam_type,
+          date: result.date,
+          subject: result.subject,
+          topic: result.topic,
+          subjects: result.subjects ? result.subjects.map((sub: any) => ({
+            subject: sub.subject,
+            correct: sub.correct,
+            wrong: sub.wrong,
+            empty: sub.empty,
+            total: sub.total,
+            net_score: sub.net_score
+          })) : undefined,
+          correct: result.total_correct,
+          wrong: result.total_wrong,
+          empty: result.total_empty,
+          total: result.total_questions,
+          score: result.total_score,
+          created_at: result.created_at,
+          updated_at: result.updated_at,
+        }));
+        setExamResults(mappedResults);
+      }
+
+      setIsDeleteDialogOpen(false); // Diyaloğu kapat
+      setExamToDeleteId(null); // Silinecek ID'yi sıfırla
+
+    } catch (err: any) {
+      console.error("Sınav silinirken hata:", err);
+      setSubmitError(err.message || "Sınav silinirken beklenmeyen bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const getSubjects = () => {
     if (!formData.examType) return []
@@ -698,18 +967,31 @@ export function ExamTracker() {
                       {result.score.toFixed(1)}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Menü aç</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Önizle
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => {
+                            setExamToDeleteId(result.id);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Sil
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

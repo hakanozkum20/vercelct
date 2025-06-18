@@ -19,16 +19,17 @@ async function DashboardPage() {
   // Kullanıcının profil bilgilerini çek
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, user_profile_image")
     .eq("id", session.user.id)
     .single()
 
   // Eğer profiles tablosundan full_name gelmezse, session.user.email'i kullan
   const userFullName = profile?.full_name || session.user.email || "Kullanıcı"
   const userEmail = session.user.email || ""
+  const userProfileImage = profile?.user_profile_image || null // Avatar URL'ini al
 
   return (
-    <Layout userFullName={userFullName} userEmail={userEmail}>
+    <Layout userFullName={userFullName} userEmail={userEmail} userProfileImage={userProfileImage}>
       <Dashboard />
     </Layout>
   )

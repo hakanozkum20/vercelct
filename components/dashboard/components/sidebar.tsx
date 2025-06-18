@@ -25,29 +25,19 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/utils/supabase/client"
+import { sidebarItems } from "./sidebar-items"
 
 interface SidebarProps {
   isOpen: boolean
   userFullName: string // Yeni prop
   userEmail: string // Yeni prop
+  userProfileImage?: string | null // <-- Bunu ekle
 }
 
-export function Sidebar({ isOpen, userFullName, userEmail }: SidebarProps) {
+export function Sidebar({ isOpen, userFullName, userEmail, userProfileImage }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-
-  const sidebarItems = [
-    { icon: Home, label: "Dashboard", href: "/dashboard" },
-    { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
-    { icon: ShoppingCart, label: "Orders", href: "/dashboard/orders" },
-    { icon: Package, label: "Products", href: "/dashboard/products" },
-    { icon: Users, label: "Customers", href: "/dashboard/customers" },
-    { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
-    { icon: Calendar, label: "Calendar", href: "/dashboard/calendar" },
-    { icon: BookOpen, label: "TYT-AYT Takip", href: "/dashboard/exam-tracker" },
-    { icon: Settings, label: "Settings", href: "/dashboard/settings" },
-  ]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -93,7 +83,7 @@ export function Sidebar({ isOpen, userFullName, userEmail }: SidebarProps) {
                 prefetch={false}
               >
                 <item.icon className={cn("w-5 h-5 flex-shrink-0", !isOpen && "w-6 h-6")} />
-                {isOpen && <span className="font-medium">{item.label}</span>}
+                {isOpen && <span className=" text-sm font-medium">{item.label}</span>}
               </Link>
             </li>
           ))}
@@ -106,7 +96,7 @@ export function Sidebar({ isOpen, userFullName, userEmail }: SidebarProps) {
           <DropdownMenuTrigger asChild>
             <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent">
               <Avatar className="w-8 h-8">
-                <AvatarImage src="/placeholder-user.jpg" />
+                <AvatarImage src={userProfileImage || "/placeholder-user.jpg"} alt="Profil Resmi" />
                 <AvatarFallback className="bg-primary/10 text-primary">{getInitials(userFullName)}</AvatarFallback>
               </Avatar>
               {isOpen && (
@@ -121,8 +111,8 @@ export function Sidebar({ isOpen, userFullName, userEmail }: SidebarProps) {
           <DropdownMenuContent align="end" className="w-56 animate-in slide-in-from-top-2 duration-200">
             <DropdownMenuLabel>Hesabım</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profil</DropdownMenuItem>
-            <DropdownMenuItem>Ayarlar</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>Profil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>Ayarlar</DropdownMenuItem>
             <DropdownMenuItem>Destek</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>Çıkış Yap</DropdownMenuItem>

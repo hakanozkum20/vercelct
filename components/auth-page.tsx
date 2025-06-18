@@ -2,67 +2,97 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { createClient } from "@/utils/supabase/client"
-import { useRouter } from "next/navigation"
+// import { createClient } from "@/utils/supabase/server" // Kaldırıldı
+// import { useRouter } from "next/navigation" // Kaldırıldı
+
+import { login, signup } from "@/app/auth/actions" // Yeni eklenen server actions
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Toaster, toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Geçerli bir e-posta adresi girin." }),
+  password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
+  name: z.string().optional(), // Kayıt için isteğe bağlı
+});
 
 export function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
+  const searchParams = useSearchParams()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  useEffect(() => {
+    if (searchParams.get("signupSuccess") === "true") {
+      toast.success("Başarılı bir şekilde kayıt oldunuz! Lütfen giriş yapın.")
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete("signupSuccess")
+      window.history.replaceState({}, document.title, newUrl.toString())
+    }
+  }, [searchParams])
 
-    const form = e.currentTarget as HTMLFormElement
-    const email = (form.elements.namedItem(isSignUp ? "signup-email" : "email") as HTMLInputElement).value
-    const password = (form.elements.namedItem(isSignUp ? "signup-password" : "password") as HTMLInputElement).value
-    const name = isSignUp ? (form.elements.namedItem("name") as HTMLInputElement)?.value : undefined
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      name: "",
+    },
+  });
 
-    let authError = null
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    setError(null);
 
-    if (isSignUp) {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
-        },
-      })
-      authError = error
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      authError = error
+    const formData = new FormData();
+    formData.append("email", values.email);
+    formData.append("password", values.password);
+    if (isSignUp && values.name) {
+      formData.append("name", values.name);
     }
 
-    if (authError) {
-      setError(authError.message)
-      setIsLoading(false)
-    } else {
-      // Başarılı giriş/kayıt sonrası oturumu yenile
-      router.refresh()
+    try {
+      let result;
+      if (isSignUp) {
+        result = await signup(formData);
+      } else {
+        result = await login(formData);
+      }
+      if (result && result.error) {
+        toast.error(result.error);
+        return;
+      }
+      // Başarılı ise yönlendirme zaten action'da yapılacak veya mevcut davranış devam edecek
+    } catch (err: any) {
+      toast.error(err.message || "Beklenmeyen bir kimlik doğrulama hatası oluştu.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp)
     setError(null) // Mod değiştiğinde hatayı temizle
+    form.reset(); // Formu sıfırla
   }
 
   return (
@@ -87,34 +117,33 @@ export function AuthPage() {
                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/10">
                     <Sparkles className="w-6 h-6" />
                   </div>
-                  <h1 className="text-2xl font-bold">AdminPro</h1>
+                  <h1 className="text-2xl font-bold">CoachTale</h1>
                 </div>
 
                 <h2 className="text-4xl font-bold mb-4 leading-tight">
-                  Modern Admin
+                  Sınav Başarınız İçin
                   <br />
                   <span className="bg-gradient-to-r from-white/90 to-white/70 bg-clip-text text-transparent">
-                    Dashboard
+                    Kişisel AI Asistanınız
                   </span>
                 </h2>
 
                 <p className="text-background/70 text-lg mb-8 leading-relaxed">
-                  Güçlü analitik araçları ve modern tasarımla işletmenizi yönetin. Verilerinizi görselleştirin ve
-                  kararlarınızı hızlandırın.
+                  Yapay zeka destekli kişiselleştirilmiş çalışma planları ile TYT ve AYT'de hedefinize ulaşın. Öğrenci takip sistemi ve akıllı ders programı ile başarınızı artırın.
                 </p>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                    <span className="text-background/70">Real-time Analytics</span>
+                    <span className="text-background/70">Akıllı Sınav Takibi</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-200" />
-                    <span className="text-background/70">Advanced Security</span>
+                    <span className="text-background/70">AI Destekli Öneriler</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-400" />
-                    <span className="text-background/70">Cloud Integration</span>
+                    <span className="text-background/70">Motivasyon ve Hedef Takibi</span>
                   </div>
                 </div>
               </div>
@@ -125,7 +154,7 @@ export function AuthPage() {
               <div className="w-full max-w-sm mx-auto">
                 {/* Toggle Buttons */}
                 <div className="flex bg-muted rounded-xl p-1 mb-8">
-                  <button
+                  <Button
                     onClick={() => setIsSignUp(false)}
                     className={cn(
                       "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300",
@@ -133,10 +162,11 @@ export function AuthPage() {
                         ? "bg-background text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
                     )}
+                    variant="ghost"
                   >
                     Giriş Yap
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setIsSignUp(true)}
                     className={cn(
                       "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300",
@@ -144,16 +174,11 @@ export function AuthPage() {
                         ? "bg-background text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
                     )}
+                    variant="ghost"
                   >
                     Kayıt Ol
-                  </button>
+                  </Button>
                 </div>
-
-                {error && (
-                  <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-md p-3 mb-4 text-sm text-center">
-                    {error}
-                  </div>
-                )}
 
                 {/* Form Container with Slide Animation */}
                 <div className="relative overflow-hidden">
@@ -170,73 +195,94 @@ export function AuthPage() {
                         <p className="text-muted-foreground">Hesabınıza giriş yapın</p>
                       </div>
 
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="email">E-posta</Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="ornek@email.com"
-                              className="pl-10 h-12 bg-background border-input focus:border-ring"
-                              required
-                            />
-                          </div>
-                        </div>
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <FormLabel htmlFor="email">E-posta</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                    <Input
+                                      id="email"
+                                      type="email"
+                                      placeholder="ornek@email.com"
+                                      className="pl-10 h-12 bg-background border-input focus:border-ring"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <div className="space-y-2">
-                          <Label htmlFor="password">Şifre</Label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                              id="password"
-                              type={showPassword ? "text" : "password"}
-                              placeholder="••••••••"
-                              className="pl-10 pr-10 h-12 bg-background border-input focus:border-ring"
-                              required
-                            />
-                            <button
+                          <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <FormLabel htmlFor="password">Şifre</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                    <Input
+                                      id="password"
+                                      type={showPassword ? "text" : "password"}
+                                      placeholder="••••••••"
+                                      className="pl-10 pr-10 h-12 bg-background border-input focus:border-ring"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex items-center justify-between">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input type="checkbox" className="rounded border-input" />
+                              <span className="text-sm text-muted-foreground">Beni hatırla</span>
+                            </label>
+                            <Button
                               type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+                              variant="link"
                             >
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
+                              Şifremi unuttum
+                            </Button>
                           </div>
-                        </div>
 
-                        <div className="flex items-center justify-between">
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" className="rounded border-input" />
-                            <span className="text-sm text-muted-foreground">Beni hatırla</span>
-                          </label>
-                          <button
-                            type="button"
-                            className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+                          <Button
+                            type="submit"
+                            className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium transition-all duration-200"
+                            disabled={isLoading}
                           >
-                            Şifremi unuttum
-                          </button>
-                        </div>
-
-                        <Button
-                          type="submit"
-                          className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium transition-all duration-200"
-                          disabled={isLoading}
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                              Giriş yapılıyor...
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              Giriş Yap
-                              <ArrowRight className="w-4 h-4" />
-                            </div>
-                          )}
-                        </Button>
-                      </form>
+                            {isLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                                Giriş yapılıyor...
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                Giriş Yap
+                                <ArrowRight className="w-4 h-4" />
+                              </div>
+                            )}
+                          </Button>
+                        </form>
+                      </Form>
                     </div>
 
                     {/* Sign Up Form */}
@@ -246,88 +292,105 @@ export function AuthPage() {
                         <p className="text-muted-foreground">Yeni hesabınızı oluşturun</p>
                       </div>
 
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Ad Soyad</Label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                              id="name"
-                              type="text"
-                              placeholder="Adınız Soyadınız"
-                              className="pl-10 h-12 bg-background border-input focus:border-ring"
-                              required
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                          {isSignUp && (
+                            <FormField
+                              control={form.control}
+                              name="name"
+                              render={({ field }) => (
+                                <FormItem className="space-y-2">
+                                  <FormLabel htmlFor="signup-name">Adınız</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                      <Input
+                                        id="signup-name"
+                                        type="text"
+                                        placeholder="Tam Adınız"
+                                        className="pl-10 h-12 bg-background border-input focus:border-ring"
+                                        {...field}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-email">E-posta</Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                              id="signup-email"
-                              type="email"
-                              placeholder="ornek@email.com"
-                              className="pl-10 h-12 bg-background border-input focus:border-ring"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="signup-password">Şifre</Label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input
-                              id="signup-password"
-                              type={showPassword ? "text" : "password"}
-                              placeholder="••••••••"
-                              className="pl-10 pr-10 h-12 bg-background border-input focus:border-ring"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded border-input" required />
-                          <span className="text-sm text-muted-foreground">
-                            <a href="#" className="text-foreground/70 hover:text-foreground transition-colors">
-                              Kullanım şartları
-                            </a>{" "}
-                            ve{" "}
-                            <a href="#" className="text-foreground/70 hover:text-foreground transition-colors">
-                              gizlilik politikası
-                            </a>
-                            nı kabul ediyorum
-                          </span>
-                        </div>
-
-                        <Button
-                          type="submit"
-                          className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium transition-all duration-200"
-                          disabled={isLoading}
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                              Hesap oluşturuluyor...
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              Hesap Oluştur
-                              <ArrowRight className="w-4 h-4" />
-                            </div>
                           )}
-                        </Button>
-                      </form>
+
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <FormLabel htmlFor="signup-email">E-posta</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                    <Input
+                                      id="signup-email"
+                                      type="email"
+                                      placeholder="ornek@email.com"
+                                      className="pl-10 h-12 bg-background border-input focus:border-ring"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <FormLabel htmlFor="signup-password">Şifre</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                    <Input
+                                      id="signup-password"
+                                      type={showPassword ? "text" : "password"}
+                                      placeholder="••••••••"
+                                      className="pl-10 pr-10 h-12 bg-background border-input focus:border-ring"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium transition-all duration-200"
+                            disabled={isLoading}
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                                Kayıt olunuyor...
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                Kayıt Ol
+                                <ArrowRight className="w-4 h-4" />
+                              </div>
+                            )}
+                          </Button>
+                        </form>
+                      </Form>
                     </div>
                   </div>
                 </div>
@@ -336,6 +399,7 @@ export function AuthPage() {
           </div>
         </Card>
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   )
 }

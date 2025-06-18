@@ -6,7 +6,7 @@ import { Layout } from "@/components/layout"
 import { createClient } from "@/utils/supabase/server"
 
 async function ExamTrackerPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const {
     data: { session },
