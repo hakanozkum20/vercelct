@@ -1,11 +1,9 @@
-export const dynamic = "force-dynamic"
-
 import { redirect } from "next/navigation"
-import { ExamTracker } from "@/components/exam-tracker"
 import { Layout } from "@/components/layout"
 import { createClient } from "@/utils/supabase/server"
+import { ChatInterface } from "@/components/chat/chat-interface"
 
-async function ExamTrackerPage() {
+async function ChatPage() {
   const supabase = await createClient()
 
   const {
@@ -30,9 +28,9 @@ async function ExamTrackerPage() {
 
   return (
     <Layout userFullName={userFullName} userEmail={userEmail} userProfileImage={userProfileImage}>
-      <ExamTracker />
+      <ChatInterface />
     </Layout>
   )
 }
 
-export default ExamTrackerPage
+export default ChatPage 

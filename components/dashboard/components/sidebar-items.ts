@@ -1,4 +1,4 @@
-import { Home, User, BarChart3, ShoppingCart, Package, Users, CreditCard, Calendar, BookOpen, Settings } from "lucide-react";
+import { Home, User, BarChart3, ShoppingCart, Package, Users, CreditCard, Calendar, BookOpen, Settings, MessageSquare } from "lucide-react";
 
 export interface SidebarItem {
   icon: React.ElementType;
@@ -16,5 +16,6 @@ export const sidebarItems: SidebarItem[] = [
   { icon: CreditCard, label: "Payments", href: "/dashboard/payments" },
   { icon: Calendar, label: "Calendar", href: "/dashboard/calendar" },
   { icon: BookOpen, label: "TYT-AYT Takip", href: "/dashboard/exam-tracker" },
+  { icon: MessageSquare, label: "Chat", href: "/dashboard/chat" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ]; 
